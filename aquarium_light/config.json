@@ -24,7 +24,7 @@
       "netlea_send_hello": false,
       "netlea_send_schedule_init": false,
       "netlea_send_cmd22": false,
-      "netlea_notify": false,
+      "netlea_notify": true,
       "netlea_also_notify_fffd": false,
       "netlea_verbose": true
     },
@@ -56,8 +56,8 @@
       },
       "netlea": {
         "sun": {
-          "day_start_hour_local": 16.0,
-          "day_end_hour_local": 24.0,
+          "day_start_hour_local": 6.0,
+          "day_end_hour_local": 17.0,
           "day_equivalent_full_brightness_hours": 1.5,
           "day_peak_brightness_fraction": 0.5,
           "day_smoothing_time_constant_minutes": 5.0,
