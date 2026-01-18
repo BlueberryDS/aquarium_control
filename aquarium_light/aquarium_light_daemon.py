@@ -310,10 +310,6 @@ async def main():
     # --- NEW MODE: just print curve + stats and exit ---
 
     if args.print_curve:
-        # ASCII curve (same as preview file content)
-        preview_text = ascii_preview_string(curve)
-        print(preview_text)
-
         # Date we are describing
         if override_datetime is not None:
             day_str = override_datetime.date().isoformat()
@@ -335,46 +331,111 @@ async def main():
                 tzinfo=timezone.utc,
             )
 
-        moon_state_for_day = moon.get_state(moon_dt)
+        if run_bridgelux:
+            # ASCII curve (same as preview file content)
+            preview_text = ascii_preview_string(curve)
+            print(preview_text)
 
-        print("=== Daily Stats ===")
-        print(f"Date (config versioning): {day_str}")
-        print(
-            f"Day window (local hours): "
-            f"{curve.t_start:.2f} -> {curve.t_end:.2f} (length {curve.D:.2f} h)"
-        )
-        print(
-            f"Equivalent full-brightness hours: "
-            f"{sun_cfg['day_equivalent_full_brightness_hours']:.2f}"
-        )
-        print(
-            f"Peak brightness fraction (day): "
-            f"{sun_cfg['day_peak_brightness_fraction']:.3f}"
-        )
-        print(
-            f"Color temp range (day): "
-            f"{sun_cfg['day_min_color_temp_kelvin']:.0f} K "
-            f"→ {sun_cfg['day_max_color_temp_kelvin']:.0f} K "
-            f"(blue hour ~{sun_cfg['day_blue_hour_temp_kelvin']:.0f} K)"
-        )
-        print("")
-        print(f"Moon max brightness fraction: {moon_max_brightness:.3f}")
-        print(
-            f"Moon brightness fraction (around local 'day' noon UTC): "
-            f"{moon_state_for_day['brightness']:.3f}"
-        )
-        print(
-            f"Moon illumination fraction: "
-            f"{moon_state_for_day['illumination']:.3f}"
-        )
-        print(
-            f"Moon phase fraction (0=new, 0.5=full): "
-            f"{moon_state_for_day['phase_fraction']:.3f}"
-        )
-        print(
-            f"Moon age: {moon_state_for_day['age_days']:.2f} / "
-            f"{moon_state_for_day['synodic_days']:.2f} days"
-        )
+            moon_state_for_day = moon.get_state(moon_dt)
+
+            print("=== Bridgelux Daily Stats ===")
+            print(f"Date (config versioning): {day_str}")
+            print(
+                f"Day window (local hours): "
+                f"{curve.t_start:.2f} -> {curve.t_end:.2f} (length {curve.D:.2f} h)"
+            )
+            print(
+                f"Equivalent full-brightness hours: "
+                f"{sun_cfg['day_equivalent_full_brightness_hours']:.2f}"
+            )
+            print(
+                f"Peak brightness fraction (day): "
+                f"{sun_cfg['day_peak_brightness_fraction']:.3f}"
+            )
+            print(
+                f"Color temp range (day): "
+                f"{sun_cfg['day_min_color_temp_kelvin']:.0f} K "
+                f"→ {sun_cfg['day_max_color_temp_kelvin']:.0f} K "
+                f"(blue hour ~{sun_cfg['day_blue_hour_temp_kelvin']:.0f} K)"
+            )
+            print("")
+            print(f"Moon max brightness fraction: {moon_max_brightness:.3f}")
+            print(
+                f"Moon brightness fraction (around local 'day' noon UTC): "
+                f"{moon_state_for_day['brightness']:.3f}"
+            )
+            print(
+                f"Moon illumination fraction: "
+                f"{moon_state_for_day['illumination']:.3f}"
+            )
+            print(
+                f"Moon phase fraction (0=new, 0.5=full): "
+                f"{moon_state_for_day['phase_fraction']:.3f}"
+            )
+            print(
+                f"Moon age: {moon_state_for_day['age_days']:.2f} / "
+                f"{moon_state_for_day['synodic_days']:.2f} days"
+            )
+
+        if run_netlea:
+            netlea_preview_curve = SunCurve(
+                t_start=_cfg_get(netlea_sun_cfg, "day_start_hour_local", sun_cfg, 0.0),
+                t_end=_cfg_get(netlea_sun_cfg, "day_end_hour_local", sun_cfg, 0.0),
+                H_eq=_cfg_get(netlea_sun_cfg, "day_equivalent_full_brightness_hours", sun_cfg, 0.0),
+                B_peak_max=_cfg_get(netlea_sun_cfg, "day_peak_brightness_fraction", sun_cfg, 0.0),
+                tau_minutes=_cfg_get(netlea_sun_cfg, "day_smoothing_time_constant_minutes", sun_cfg, 0.0),
+                delta_T=_cfg_get(netlea_sun_cfg, "day_color_transition_range_kelvin", sun_cfg, 0.0),
+                T_min=_cfg_get(netlea_sun_cfg, "day_min_color_temp_kelvin", sun_cfg, 0.0),
+                T_max=_cfg_get(netlea_sun_cfg, "day_max_color_temp_kelvin", sun_cfg, 0.0),
+                T_blue=_cfg_get(netlea_sun_cfg, "day_blue_hour_temp_kelvin", sun_cfg, 0.0),
+            )
+            preview_text = ascii_preview_string(netlea_preview_curve)
+            print(preview_text)
+
+            netlea_moon_state = rgb_moon.get_state(moon_dt)
+
+            print("=== Netlea Daily Stats ===")
+            print(f"Date (config versioning): {day_str}")
+            print(
+                f"Day window (local hours): "
+                f"{netlea_preview_curve.t_start:.2f} -> {netlea_preview_curve.t_end:.2f} "
+                f"(length {netlea_preview_curve.D:.2f} h)"
+            )
+            print(
+                f"Equivalent full-brightness hours: "
+                f"{_cfg_get(netlea_sun_cfg, 'day_equivalent_full_brightness_hours', sun_cfg, 0.0):.2f}"
+            )
+            print(
+                f"Peak brightness fraction (day): "
+                f"{_cfg_get(netlea_sun_cfg, 'day_peak_brightness_fraction', sun_cfg, 0.0):.3f}"
+            )
+            print(
+                f"Color temp range (day): "
+                f"{_cfg_get(netlea_sun_cfg, 'day_min_color_temp_kelvin', sun_cfg, 0.0):.0f} K "
+                f"→ {_cfg_get(netlea_sun_cfg, 'day_max_color_temp_kelvin', sun_cfg, 0.0):.0f} K "
+                f"(blue hour ~{_cfg_get(netlea_sun_cfg, 'day_blue_hour_temp_kelvin', sun_cfg, 0.0):.0f} K)"
+            )
+            print("")
+            print(
+                f"Moon max brightness fraction: "
+                f"{netlea_moon_cfg.get('moon_max_brightness_fraction', 0.0):.3f}"
+            )
+            print(
+                f"Moon brightness fraction (around local 'day' noon UTC): "
+                f"{netlea_moon_state['brightness']:.3f}"
+            )
+            print(
+                f"Moon illumination fraction: "
+                f"{netlea_moon_state['illumination']:.3f}"
+            )
+            print(
+                f"Moon phase fraction (0=new, 0.5=full): "
+                f"{netlea_moon_state['phase_fraction']:.3f}"
+            )
+            print(
+                f"Moon age: {netlea_moon_state['age_days']:.2f} / "
+                f"{netlea_moon_state['synodic_days']:.2f} days"
+            )
         return
 
     # --- One-shot OFF mode: no loop (but we still needed the Tuya config) ---
