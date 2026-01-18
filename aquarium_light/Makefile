@@ -1,7 +1,7 @@
 # Makefile for Aquarium SunCurve Tuya daemon
 # Everything runs directly from /root/aquarium_light (no code copied elsewhere)
 
-PROJECT_DIR := /root/aquarium_light
+PROJECT_DIR := /root/aquarium_light/aquarium_control/aquarium_light
 # Edit this if your venv python lives somewhere else:
 VENV_PY     := $(PROJECT_DIR)/.venv/bin/python
 
