@@ -2,6 +2,36 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List
 
+SERVICE_UUID_FFFA = "0000fffa-0000-1000-8000-00805f9b34fb"
+NOTIFY_UUID_FF01 = "0000ff01-0000-1000-8000-00805f9b34fb"
+WRITE_UUID_FF02 = "0000ff02-0000-1000-8000-00805f9b34fb"
+
+RGBWF_CHANNEL_ORDER = ["R", "G", "B", "W", "F"]
+
+SEED = b"Leds&Fun"
+
+
+def calc_check_byte(payload: bytes) -> int:
+    total = 0
+    for idx, val in enumerate(payload):
+        total += val ^ SEED[idx % len(SEED)]
+    return total & 0xFF
+
+
+def encode_payload(plaintext: bytes) -> bytes:
+    chk = calc_check_byte(plaintext)
+    return bytes([chk]) + bytes([b ^ chk for b in plaintext])
+
+
+def decode_payload(encoded: bytes) -> bytes:
+    if not encoded:
+        return b""
+    chk = encoded[0]
+    plain = bytes([b ^ chk for b in encoded[1:]])
+    if calc_check_byte(plain) != chk:
+        raise ValueError("check-byte mismatch")
+    return plain
+
 
 def _crc8_sum(hex_str: str) -> str:
     total = 0

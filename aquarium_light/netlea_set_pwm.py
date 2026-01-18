@@ -1,42 +1,43 @@
 import asyncio
+
 from bleak import BleakClient
 
-DEVICE = "50:78:7D:B7:46:62" # your N7 MAC
-WRITE_UUID = "0000ff02-0000-1000-8000-00805f9b34fb"
+from netlea_protocol import (
+    RGBWF_CHANNEL_ORDER,
+    WRITE_UUID_FF02,
+    build_main_control_packet,
+    encode_payload,
+    pwm_hex_from_channels,
+)
 
-SEED = b"Leds&Fun"
+DEVICE = "50:78:7D:B7:46:62"  # your N7 MAC
+WRITE_UUID = WRITE_UUID_FF02
+USE_ENCODING = False  # FFFA/FF02 typically uses raw framed payloads
 
-def calc_check_byte(payload: bytes) -> int:
-    s = 0
-    for i, b in enumerate(payload):
-        s += b ^ SEED[i % len(SEED)]
-    return s & 0xFF
-
-def encode_payload(plaintext: bytes) -> bytes:
-    chk = calc_check_byte(plaintext)
-    return bytes([chk]) + bytes([b ^ chk for b in plaintext])
-
-def hexb(s: str) -> bytes:
-    return bytes.fromhex(s.replace(" ", "").replace("\n", ""))
-
-# Candidate frame A (your earlier “5A 01 10 ...” style; may or may not match your firmware)
-def frame_a(B, G, R, W, F):
-    return hexb(
-        "5A 01 10 00 00 "
-        "01 00 00 00 "
-        f"{B:02X} {G:02X} {R:02X} {W:02X} {F:02X} "
-        "84 03 00 "
-        "01 00 "
-        "00 00"
-    )
+DEV_TYPE = 0x01
+MODEL_ID = 0x00
+NUMBER = 0x0001
+RESTORE_MINUTES = 0
 
 async def main():
     # Try “white-ish”: W high, others low
-    plain = frame_a(B=0, G=0, R=0, W=200, F=0)
+    pwm_hex = pwm_hex_from_channels(
+        RGBWF_CHANNEL_ORDER,
+        {"R": 0, "G": 0, "B": 0, "W": 200, "F": 0},
+    )
+    plain = build_main_control_packet(
+        dev_type=DEV_TYPE,
+        pwm_hex=pwm_hex,
+        model_id=MODEL_ID,
+        number=NUMBER,
+        restore_minutes=RESTORE_MINUTES,
+        onoff=1,
+        forever=1,
+    )
 
     async with BleakClient(DEVICE) as client:
-        enc = encode_payload(plain)
-        await client.write_gatt_char(WRITE_UUID, enc, response=False)
-        print("Wrote ENCODED:", enc.hex().upper())
+        payload = encode_payload(plain) if USE_ENCODING else plain
+        await client.write_gatt_char(WRITE_UUID, payload, response=False)
+        print("Wrote:", payload.hex().upper())
 
 asyncio.run(main())
