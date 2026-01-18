@@ -141,6 +141,108 @@ def ascii_preview_string(
     return "\n".join(lines)
 
 
+def _sample_rgbw_curve(
+    curve,
+    num_samples: int,
+) -> Tuple[List[float], List[float], List[float], List[float], List[bool]]:
+    if num_samples <= 0:
+        num_samples = 1
+
+    r_vals: List[float] = []
+    g_vals: List[float] = []
+    b_vals: List[float] = []
+    w_vals: List[float] = []
+    on_flags: List[bool] = []
+
+    if getattr(curve, "D", 0.0) <= 0:
+        t_list = [curve.t_start]
+    else:
+        t_list = [
+            curve.t_start + (curve.D * i / (num_samples - 1 if num_samples > 1 else 1))
+            for i in range(num_samples)
+        ]
+
+    for t_h in t_list:
+        r, g, b, w, is_on = curve.sample(t_h, raw=True)
+        r_vals.append(float(r if is_on else 0.0))
+        g_vals.append(float(g if is_on else 0.0))
+        b_vals.append(float(b if is_on else 0.0))
+        w_vals.append(float(w if is_on else 0.0))
+        on_flags.append(bool(is_on))
+
+    return r_vals, g_vals, b_vals, w_vals, on_flags
+
+
+def ascii_preview_rgbw_string(
+    curve,
+    width: int = 80,
+    height_channel: int = 6,
+) -> str:
+    """
+    Build an ASCII preview of RGBW channels over one daylight window [t_start, t_end],
+    using the curve's raw RGBW output (linear 0..1).
+    """
+    lines: List[str] = []
+    lines.append("")
+    lines.append("====================================")
+    lines.append(" RGBW Curve ASCII preview (one 'day') ")
+    lines.append("====================================")
+    lines.append(
+        f"t_start={curve.t_start:.2f}h, "
+        f"t_end={curve.t_end:.2f}h, "
+        f"D={curve.D:.2f}h"
+    )
+
+    r_vals, g_vals, b_vals, w_vals, on_flags = _sample_rgbw_curve(curve, num_samples=width)
+
+    lines.append("")
+    lines.append(_build_ascii_block(
+        values=r_vals,
+        on_flags=on_flags,
+        height=height_channel,
+        title="Red (relative)",
+        char_on="R",
+    ))
+
+    lines.append("")
+    lines.append(_build_ascii_block(
+        values=g_vals,
+        on_flags=on_flags,
+        height=height_channel,
+        title="Green (relative)",
+        char_on="G",
+    ))
+
+    lines.append("")
+    lines.append(_build_ascii_block(
+        values=b_vals,
+        on_flags=on_flags,
+        height=height_channel,
+        title="Blue (relative)",
+        char_on="B",
+    ))
+
+    lines.append("")
+    lines.append(_build_ascii_block(
+        values=w_vals,
+        on_flags=on_flags,
+        height=height_channel,
+        title="White (relative)",
+        char_on="W",
+    ))
+
+    lines.append("")
+    lines.append(
+        f"time axis: left={curve.t_start:.1f}h  "
+        f"mid={(curve.t_start + curve.D / 2.0):.1f}h  "
+        f"right={curve.t_start + curve.D:.1f}h"
+    )
+    lines.append("====================================")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
 def print_ascii_preview(
     curve: SunCurve,
     width: int = 80,

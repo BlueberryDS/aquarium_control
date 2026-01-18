@@ -10,7 +10,7 @@ import tinytuya
 
 from suncurve import SunCurve
 from suncurve_rgb import SunCurveRGB
-from simulate import simulated_time_hours, ascii_preview_string
+from simulate import simulated_time_hours, ascii_preview_string, ascii_preview_rgbw_string
 from mooncurve import MoonCurve
 from mooncurve_rgb import MoonCurveRGB
 from config_loader import load_runtime_config
@@ -302,6 +302,7 @@ async def main():
         and bool(netlea_cfg.get("netlea_enabled", True))
         and bool(netlea_cfg.get("netlea_mac"))
     )
+    netlea_sim_curve = rgb_curve if run_netlea else None
 
     # --- Clouds (always-on, applied to combined sky brightness) ---
 
@@ -332,6 +333,7 @@ async def main():
             )
 
         if run_bridgelux:
+            print("=== Bridgelux SunCurve Preview ===")
             # ASCII curve (same as preview file content)
             preview_text = ascii_preview_string(curve)
             print(preview_text)
@@ -378,18 +380,8 @@ async def main():
             )
 
         if run_netlea:
-            netlea_preview_curve = SunCurve(
-                t_start=_cfg_get(netlea_sun_cfg, "day_start_hour_local", sun_cfg, 0.0),
-                t_end=_cfg_get(netlea_sun_cfg, "day_end_hour_local", sun_cfg, 0.0),
-                H_eq=_cfg_get(netlea_sun_cfg, "day_equivalent_full_brightness_hours", sun_cfg, 0.0),
-                B_peak_max=_cfg_get(netlea_sun_cfg, "day_peak_brightness_fraction", sun_cfg, 0.0),
-                tau_minutes=_cfg_get(netlea_sun_cfg, "day_smoothing_time_constant_minutes", sun_cfg, 0.0),
-                delta_T=_cfg_get(netlea_sun_cfg, "day_color_transition_range_kelvin", sun_cfg, 0.0),
-                T_min=_cfg_get(netlea_sun_cfg, "day_min_color_temp_kelvin", sun_cfg, 0.0),
-                T_max=_cfg_get(netlea_sun_cfg, "day_max_color_temp_kelvin", sun_cfg, 0.0),
-                T_blue=_cfg_get(netlea_sun_cfg, "day_blue_hour_temp_kelvin", sun_cfg, 0.0),
-            )
-            preview_text = ascii_preview_string(netlea_preview_curve)
+            print("=== Netlea SunCurve Preview ===")
+            preview_text = ascii_preview_rgbw_string(rgb_curve)
             print(preview_text)
 
             netlea_moon_state = rgb_moon.get_state(moon_dt)
@@ -398,8 +390,8 @@ async def main():
             print(f"Date (config versioning): {day_str}")
             print(
                 f"Day window (local hours): "
-                f"{netlea_preview_curve.t_start:.2f} -> {netlea_preview_curve.t_end:.2f} "
-                f"(length {netlea_preview_curve.D:.2f} h)"
+                f"{rgb_curve.t_start:.2f} -> {rgb_curve.t_end:.2f} "
+                f"(length {rgb_curve.D:.2f} h)"
             )
             print(
                 f"Equivalent full-brightness hours: "
@@ -504,8 +496,9 @@ async def main():
         print("[netlea] Disabled by --light flag")
 
     if args.test_mode:
+        sim_curve = netlea_sim_curve if run_netlea and not run_bridgelux else curve
         print("[mode] TEST MODE: 60s daylight-window simulation "
-              f"(day_start={curve.t_start}, D={curve.D:.2f}h), step={step_seconds:.1f}s")
+              f"(day_start={sim_curve.t_start}, D={sim_curve.D:.2f}h), step={step_seconds:.1f}s")
     else:
         print("[mode] REAL TIME: local clock, "
               f"step={step_seconds:.1f}s, day_length={curve.D:.2f}h")
@@ -526,7 +519,8 @@ async def main():
 
             # Sun time source
             if args.test_mode:
-                t_hours = simulated_time_hours(curve, test_start_monotonic)
+                sim_curve = netlea_sim_curve if run_netlea and not run_bridgelux else curve
+                t_hours = simulated_time_hours(sim_curve, test_start_monotonic)
             else:
                 t_hours = current_time_hours_local()
 
