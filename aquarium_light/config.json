@@ -65,7 +65,7 @@
           "day_min_color_temp_kelvin": 2700.0,
           "day_max_color_temp_kelvin": 6700.0,
           "day_blue_hour_temp_kelvin": 6500.0,
-          "rgb_saturation": 0.28,
+          "rgb_saturation": 0.53,
           "rgb_tint": -0.15,
           "rgb_saturation_min": 0.05,
           "rgb_saturation_max": 0.60,
