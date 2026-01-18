@@ -118,7 +118,7 @@ async def netlea_send_off(
             w=0,
             g=0,
             b=0,
-            f=int(netlea_cfg.get("netlea_f_channel", 0)),
+            f=0,
             onoff=0,
             fade_s=int(netlea_cfg.get("netlea_fade_seconds", 0)),
             model_id=int(netlea_cfg.get("netlea_model_id", 0)),
@@ -628,12 +628,16 @@ async def main():
 
             if netlea_enabled and netlea_dev is not None:
                 try:
+                    if netlea_cfg.get("netlea_adaptive_fan", False):
+                        f_pwm = max(r_pwm, g_pwm, b_pwm, w_pwm)
+                    else:
+                        f_pwm = int(netlea_cfg.get("netlea_f_channel", 0))
                     await netlea_dev.set_pwm(
                         r=r_pwm,
                         w=w_pwm,
                         g=g_pwm,
                         b=b_pwm,
-                        f=int(netlea_cfg.get("netlea_f_channel", 0)),
+                        f=f_pwm,
                         onoff=1 if rgb_on else 0,
                         fade_s=int(netlea_cfg.get("netlea_fade_seconds", 0)),
                         model_id=int(netlea_cfg.get("netlea_model_id", 0)),
