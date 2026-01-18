@@ -60,7 +60,7 @@
           "day_start_hour_local": 6.0,
           "day_end_hour_local": 17.0,
           "day_equivalent_full_brightness_hours": 1.5,
-          "day_peak_brightness_fraction": 0.85,
+          "day_peak_brightness_fraction": 1.5,
           "day_smoothing_time_constant_minutes": 5.0,
           "day_color_transition_range_kelvin": 800.0,
           "day_min_color_temp_kelvin": 2700.0,
