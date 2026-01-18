@@ -1,6 +1,6 @@
 {
   "constants": {
-    "tuya": {
+    "bridgelux": {
       "tuya_device_id": "eb70ded862251a8d47ikzx",
       "tuya_local_key": "`n>LCWGXX;4_3rWI",
       "tuya_protocol_version": 3.4,
@@ -11,6 +11,23 @@
       "tuya_brightness_scale_max": 1000,
       "tuya_cct_scale_max": 1000
     },
+    "netlea": {
+      "netlea_enabled": false,
+      "netlea_mac": "00:00:00:00:00:00",
+      "netlea_pwm_scale_max": 255,
+      "netlea_f_channel": 0,
+      "netlea_fade_seconds": 0,
+      "netlea_model_id": 0,
+      "netlea_number": 1,
+      "netlea_device_id": 1,
+      "netlea_response": false,
+      "netlea_send_hello": false,
+      "netlea_send_schedule_init": false,
+      "netlea_send_cmd22": false,
+      "netlea_notify": false,
+      "netlea_also_notify_fffd": false,
+      "netlea_verbose": true
+    },
     "global": {
       "tick_interval_seconds": 5.0,
       "tick_interval_seconds_test": 1.0,
@@ -20,35 +37,69 @@
   "versions": [
     {
       "date": "2025-12-08",
-      "sun": {
-        "day_start_hour_local": 16.0,
-        "day_end_hour_local": 24.0,
-        "day_equivalent_full_brightness_hours": 1.5,
-        "day_peak_brightness_fraction": 0.5,
-        "day_smoothing_time_constant_minutes": 5.0,
-        "day_color_transition_range_kelvin": 800.0,
-        "day_min_color_temp_kelvin": 2700.0,
-        "day_max_color_temp_kelvin": 6700.0,
-        "day_blue_hour_temp_kelvin": 6500.0
+      "bridgelux": {
+        "sun": {
+          "day_start_hour_local": 16.0,
+          "day_end_hour_local": 24.0,
+          "day_equivalent_full_brightness_hours": 1.5,
+          "day_peak_brightness_fraction": 0.5,
+          "day_smoothing_time_constant_minutes": 5.0,
+          "day_color_transition_range_kelvin": 800.0,
+          "day_min_color_temp_kelvin": 2700.0,
+          "day_max_color_temp_kelvin": 6700.0,
+          "day_blue_hour_temp_kelvin": 6500.0
+        },
+        "moon": {
+          "moon_max_brightness_fraction": 0.02,
+          "moon_color_temp_kelvin": 6700.0
+        }
       },
-      "moon": {
-        "moon_max_brightness_fraction": 0.02,
-        "moon_color_temp_kelvin": 6700.0
+      "netlea": {
+        "sun": {
+          "day_start_hour_local": 16.0,
+          "day_end_hour_local": 24.0,
+          "day_equivalent_full_brightness_hours": 1.5,
+          "day_peak_brightness_fraction": 0.5,
+          "day_smoothing_time_constant_minutes": 5.0,
+          "day_color_transition_range_kelvin": 800.0,
+          "day_min_color_temp_kelvin": 2700.0,
+          "day_max_color_temp_kelvin": 6700.0,
+          "day_blue_hour_temp_kelvin": 6500.0,
+          "rgb_saturation": 0.28,
+          "rgb_tint": -0.15,
+          "rgb_saturation_min": 0.05,
+          "rgb_saturation_max": 0.60,
+          "rgb_tint_min": -0.40,
+          "rgb_tint_max": 0.25,
+          "rgb_preserve_total": true
+        },
+        "moon": {
+          "moon_max_brightness_fraction": 0.02,
+          "moon_dark_start_hour": 2.0,
+          "moon_dark_end_hour": 7.0,
+          "moon_warmth": 0.0,
+          "moon_saturation": 0.12,
+          "moon_tint": 0.0
+        }
       }
     },
     {
       "date": "2025-12-23",
-      "sun": {
-        "day_start_hour_local": 12.0,
-        "day_equivalent_full_brightness_hours": 3.0
+      "bridgelux": {
+        "sun": {
+          "day_start_hour_local": 12.0,
+          "day_equivalent_full_brightness_hours": 3.0
+        }
       }
     },
     {
       "date": "2026-01-20",
-      "sun": {
-        "day_start_hour_local": 8.0,
-        "day_peak_brightness_fraction": 0.65,
-        "day_equivalent_full_brightness_hours": 5.0
+      "bridgelux": {
+        "sun": {
+          "day_start_hour_local": 8.0,
+          "day_peak_brightness_fraction": 0.65,
+          "day_equivalent_full_brightness_hours": 5.0
+        }
       }
     }
   ]

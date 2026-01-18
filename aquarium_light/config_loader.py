@@ -63,23 +63,32 @@ def _merge_dict_shallow_inherit(old: Dict[str, Any], new: Dict[str, Any]) -> Dic
 def load_runtime_config(
     path: str,
     now: datetime | None = None,
-) -> tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+) -> tuple[
+    Dict[str, Any],
+    Dict[str, Any],
+    Dict[str, Any],
+    Dict[str, Any],
+    Dict[str, Any],
+    Dict[str, Any],
+]:
     """
-    Load the JSON config and return interpolated (sun, moon, tuya, global) dicts
-    for the given datetime (default: today).
+    Load the JSON config and return interpolated (bridgelux_sun, bridgelux_moon,
+    bridgelux_hw, netlea_hw, netlea_curve, global)
+    dicts for the given datetime (default: today).
 
     JSON format:
 
     {
       "constants": {
-        "tuya":   { ... non-versioned hardware / protocol constants ... },
+        "bridgelux": { ... non-versioned hardware / protocol constants ... },
+        "netlea": { ... non-versioned BLE constants ... },
         "global": { ... non-versioned daemon behavior constants ... }
       },
       "versions": [
         {
           "date": "YYYY-MM-DD",
-          "sun":  { ... versioned sunlight curve params ... },
-          "moon": { ... versioned moonlight curve params ... }
+          "bridgelux": { "sun": { ... }, "moon": { ... } },
+          "netlea": { "sun": { ... }, "moon": { ... } }
         },
         ...
       ]
@@ -150,11 +159,14 @@ def load_runtime_config(
                 break
 
     # Extract versioned parts (may be interpolated)
-    sun_cfg = cfg.get("sun", {})
-    moon_cfg = cfg.get("moon", {})
+    bridgelux_cfg = cfg.get("bridgelux", {})
+    netlea_curve_cfg = cfg.get("netlea", {})
+    sun_cfg = bridgelux_cfg.get("sun", {})
+    moon_cfg = bridgelux_cfg.get("moon", {})
 
     # Extract constants (non-versioned)
-    tuya_cfg = constants.get("tuya", {})
+    bridgelux_hw_cfg = constants.get("bridgelux", {})
+    netlea_hw_cfg = constants.get("netlea", {})
     global_cfg = constants.get("global", {})
 
-    return sun_cfg, moon_cfg, tuya_cfg, global_cfg
+    return sun_cfg, moon_cfg, bridgelux_hw_cfg, netlea_hw_cfg, netlea_curve_cfg, global_cfg
