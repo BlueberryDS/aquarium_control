@@ -20,7 +20,7 @@
       "netlea_model_id": 0,
       "netlea_number": 1,
       "netlea_device_id": 1,
-      "netlea_response": false,
+      "netlea_response": true,
       "netlea_send_hello": false,
       "netlea_send_schedule_init": false,
       "netlea_send_cmd22": false,
