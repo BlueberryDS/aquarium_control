@@ -4,6 +4,18 @@ from bleak import BleakClient
 DEVICE = "50:78:7D:B7:46:62" # your N7 MAC
 WRITE_UUID = "0000ff02-0000-1000-8000-00805f9b34fb"
 
+SEED = b"Leds&Fun"
+
+def calc_check_byte(payload: bytes) -> int:
+    s = 0
+    for i, b in enumerate(payload):
+        s += b ^ SEED[i % len(SEED)]
+    return s & 0xFF
+
+def encode_payload(plaintext: bytes) -> bytes:
+    chk = calc_check_byte(plaintext)
+    return bytes([chk]) + bytes([b ^ chk for b in plaintext])
+
 def hexb(s: str) -> bytes:
     return bytes.fromhex(s.replace(" ", "").replace("\n", ""))
 
@@ -23,7 +35,8 @@ async def main():
     plain = frame_a(B=0, G=0, R=0, W=200, F=0)
 
     async with BleakClient(DEVICE) as client:
-        await client.write_gatt_char(WRITE_UUID, plain, response=False)
-        print("Wrote RAW (no encoding):", plain.hex().upper())
+        enc = encode_payload(plain)
+        await client.write_gatt_char(WRITE_UUID, enc, response=False)
+        print("Wrote ENCODED:", enc.hex().upper())
 
 asyncio.run(main())
