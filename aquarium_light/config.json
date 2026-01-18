@@ -12,8 +12,8 @@
       "tuya_cct_scale_max": 1000
     },
     "netlea": {
-      "netlea_enabled": false,
-      "netlea_mac": "00:00:00:00:00:00",
+      "netlea_enabled": true,
+      "netlea_mac": "50:78:7D:B7:46:62",
       "netlea_pwm_scale_max": 255,
       "netlea_f_channel": 0,
       "netlea_fade_seconds": 0,
