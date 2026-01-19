@@ -508,7 +508,11 @@ async def main():
             now_ts = time.time()
 
             if run_bridgelux and dev is None:
-                dev = init_device(bridgelux_cfg)
+                try:
+                    dev = init_device(bridgelux_cfg)
+                except Exception as e:
+                    print("[tuya] Init failed:", e)
+                    dev = None
 
             if netlea_enabled and netlea_dev is None:
                 try:
@@ -613,7 +617,7 @@ async def main():
                     f"dom={dominant_source}"
                 )
 
-            if run_bridgelux:
+            if run_bridgelux and dev is not None:
                 try:
                     if on_combined:
                         dev.set_value(dps_power, True)
@@ -625,6 +629,8 @@ async def main():
                 except Exception as e:
                     print("[tuya] Error talking to device:", e)
                     dev = None  # force re-init next loop
+            elif run_bridgelux and dev is None and verbose:
+                print("[tuya] Skipping update (device not initialized)")
 
             if netlea_enabled and netlea_dev is not None:
                 try:
