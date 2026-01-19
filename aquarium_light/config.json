@@ -102,6 +102,16 @@
           "day_equivalent_full_brightness_hours": 5.0
         }
       }
+    },
+    {
+      "date": "2026-01-30",
+      "netlea": {
+        "sun": {
+          "day_end_hour_local": 9.0,
+          "day_peak_brightness_fraction": 0.75,
+          "day_equivalent_full_brightness_hours": 7.0
+        }
+      }
     }
   ]
 }
